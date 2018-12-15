@@ -48,12 +48,12 @@ x = torch.randn(10, 3)
 y = torch.randn(10, 2)
 
 # Build a fully connected layer.
-linear = nn.Linear(3, 2)
-print ('w: ', linear.weight)
-print ('b: ', linear.bias)
+linear = nn.Linear(3, 2) # x*weight^T + bias <--> y
+print('w: ', linear.weight) # (out_features, in_features)
+print('b: ', linear.bias)   # out_features
 
 # Build loss function and optimizer.
-criterion = nn.MSELoss()
+criterion = nn.MSELoss(reduction='elementwise_mean') # mean square error
 optimizer = torch.optim.SGD(linear.parameters(), lr=0.01)
 
 # Forward pass.
@@ -67,10 +67,10 @@ print('loss: ', loss.item())
 loss.backward()
 
 # Print out the gradients.
-print ('dL/dw: ', linear.weight.grad) 
-print ('dL/db: ', linear.bias.grad)
+print('dL/dw: ', linear.weight.grad)
+print('dL/db: ', linear.bias.grad)
 
-# 1-step gradient descent.
+# 1-step gradient descent(one forward and backward).
 optimizer.step()
 
 # You can also perform gradient descent at the low level.
@@ -113,9 +113,9 @@ print (image.size())
 print (label)
 
 # Data loader (this provides queues and threads in a very simple way).
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=64, 
-                                           shuffle=True)
+train_loader = torch.utils.data.DataLoader(dataset = train_dataset,
+                                           batch_size = 64,
+                                           shuffle = True)
 
 # When iteration starts, queue and thread start to load data from files.
 data_iter = iter(train_loader)
@@ -124,7 +124,7 @@ data_iter = iter(train_loader)
 images, labels = data_iter.next()
 
 # Actual usage of the data loader is as below.
-for images, labels in train_loader:
+for batch_idx, (image, labels) in enumerate(train_loader, 0):
     # Training code should be written here.
     pass
 
@@ -137,22 +137,30 @@ for images, labels in train_loader:
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self):
         # TODO
-        # 1. Initialize file paths or a list of file names. 
+        # 1. Initialize file paths or a list of file names.
         pass
+        # xy = np.loadtxt('../../data/diabets.csv.gz')
+        # self.len = xy.shape[0]
+        # self.x_data = torch.from_numpy(xy[:, 0:-1])
+        # self.y_data = torch.from_numpy(xy[:, [-1]])
+
     def __getitem__(self, index):
         # TODO
         # 1. Read one data from file (e.g. using numpy.fromfile, PIL.Image.open).
         # 2. Preprocess the data (e.g. torchvision.Transform).
         # 3. Return a data pair (e.g. image and label).
         pass
+        # return self.x_data[index], self.y_data[index]
+
     def __len__(self):
         # You should change 0 to the total size of your dataset.
-        return 0 
+        return 0
+        # return self.len
 
 # You can then use the prebuilt data loader. 
 custom_dataset = CustomDataset()
 train_loader = torch.utils.data.DataLoader(dataset=custom_dataset,
-                                           batch_size=64, 
+                                           batch_size=32,
                                            shuffle=True)
 
 

@@ -1,9 +1,9 @@
 import torch
-import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-
-
+from torch.autograd import Variable
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # Hyper-parameters 
 input_size = 784
 num_classes = 10
@@ -30,18 +30,32 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=batch_size, 
                                           shuffle=False)
 
+# Design model using class
 # Logistic regression model
-model = nn.Linear(input_size, num_classes)
+class Net(torch.nn.Module):
 
-# Loss and optimizer
+    def __init__(self):
+        super(Net, self).__init__()
+        self.logistic = torch.nn.Linear(input_size, num_classes)
+
+    def forward(self, input):
+        y_pred = self.logistic(input)
+        return y_pred
+
+
+model = Net()
+model = model.cuda()
+
+# Construct Loss and Optimizer
 # nn.CrossEntropyLoss() computes softmax internally
-criterion = nn.CrossEntropyLoss()  
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)  
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 # Train the model
 total_step = len(train_loader)
 for epoch in range(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
+        images, labels = Variable(images).cuda(), Variable(labels).cuda()
         # Reshape images to (batch_size, input_size)
         images = images.reshape(-1, 28*28)
         
@@ -64,6 +78,7 @@ with torch.no_grad():
     correct = 0
     total = 0
     for images, labels in test_loader:
+        images, labels = Variable(images).cuda(), Variable(labels).cuda()
         images = images.reshape(-1, 28*28)
         outputs = model(images)
         _, predicted = torch.max(outputs.data, 1)

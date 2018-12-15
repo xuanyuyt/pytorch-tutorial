@@ -19,22 +19,32 @@ y_train = np.array([[1.7], [2.76], [2.09], [3.19], [1.694], [1.573],
                     [3.366], [2.596], [2.53], [1.221], [2.827], 
                     [3.465], [1.65], [2.904], [1.3]], dtype=np.float32)
 
-# Linear regression model
-model = nn.Linear(input_size, output_size)
+# Design model using class
+class Net(nn.Module):
 
-# Loss and optimizer
+    def __init__(self):
+        super(Net, self).__init__()
+        self.linear = nn.Linear(input_size, output_size)
+
+    def forward(self, input):
+        y_pred = self.linear(input)
+        return y_pred
+
+model = Net()
+
+# Construct Loss and Optimizer
 criterion = nn.MSELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)  
 
-# Train the model
+# Train cycle(forward, backward, step(updata))
 for epoch in range(num_epochs):
     # Convert numpy arrays to torch tensors
     inputs = torch.from_numpy(x_train)
     targets = torch.from_numpy(y_train)
 
     # Forward pass
-    outputs = model(inputs)
-    loss = criterion(outputs, targets)
+    output = model(inputs)
+    loss = criterion(output, targets)
     
     # Backward and optimize
     optimizer.zero_grad()
