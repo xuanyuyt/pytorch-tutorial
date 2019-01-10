@@ -84,6 +84,8 @@ for x in range(width):
                     horizontalalignment='center',
                     verticalalignment='center',
                     color='white' if img[x][y]<thresh else 'black')
+
+plt.show()
 # ================================================================== #
 
 # ======================= Define the Network ======================= #
