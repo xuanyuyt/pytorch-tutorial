@@ -35,9 +35,6 @@ We will do the following steps in order:
 3. Define a loss function
 4. Train the network on the training data
 5. Test the network on the test data
-1. Loading and normalizing CIFAR10
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Using ``torchvision``, it’s extremely easy to load CIFAR10.
 """
 import torch
 import torchvision
@@ -45,6 +42,8 @@ import torchvision.transforms as transforms
 import numpy as np
 from torch.utils.data.sampler import SubsetRandomSampler
 ########################################################################
+# 1. Load and normalizing the CIFAR10 training and test datasets
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # The output of torchvision datasets are PILImage images of range [0, 1].
 # We transform them to Tensors of normalized range [-1, 1].
 # how many samples per batch to load
@@ -84,15 +83,14 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-########################################################################
 # Let us show some of the training images, for fun.
 import matplotlib.pyplot as plt
 
 # functions to show an image
 def imshow(img):
     img = img / 2 + 0.5     # unnormalize
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    npimg = img.numpy() # CHW
+    plt.imshow(np.transpose(npimg, (1, 2, 0))) # HWC
     plt.show()
 
 
@@ -103,14 +101,12 @@ images, labels = dataiter.next()
 # show images
 imshow(torchvision.utils.make_grid(images))
 # print labels
-print(' '.join('%5s' % classes[labels[j]] for j in range(batch_size)))
+print(''.join('%5s' % classes[labels[j]] for j in range(batch_size)))
 print(images[0].shape)
 
 ########################################################################
 # 2. Define a Convolutional Neural Network
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# Copy the neural network from the Neural Networks section before and modify it to
-# take 3-channel images (instead of 1-channel images as it was defined).
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -149,7 +145,6 @@ optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 ########################################################################
 # 4. Train the network
 # ^^^^^^^^^^^^^^^^^^^^
-#
 # This is when things start to get interesting.
 # We simply have to loop over our data iterator, and feed the inputs to the
 # network and optimize.
@@ -217,7 +212,7 @@ print('Finished Training')
 # 5. Test the network on the test data
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# We have trained the network for 2 passes over the training dataset.
+# We have trained the network for epochs passes over the training dataset.
 # But we need to check if the network has learnt anything at all.
 #
 # We will check this by predicting the class label that the neural network

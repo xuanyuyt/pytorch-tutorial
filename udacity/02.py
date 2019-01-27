@@ -16,7 +16,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # 2. Define a neural network                (Line 89 to 125)
 # 3. Train the model                        (Line 127 to 186)
 # 4. Evaluate the performance of our
-#    trained model on a test dataset!       (Line 188 to 252)
+# trained model on a test dataset!       (Line 188 to 252)
 
 
 # ===========================load dataset ========================== #
