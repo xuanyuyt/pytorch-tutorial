@@ -23,11 +23,19 @@ from fastai.dataset import *
 from fastai.sgdr import *
 from fastai.plots import *
 
-PATH = "G:/Other_Datasets/dogscats/"
+PATH = "E:/Other_Datasets/dogscats/"
 sz=224
-arch=resnet34 # from torchvision.models import resnet34
+# ======================== 1.加载预训练模型 ======================== #
+# 1.加载预训练模型
+# from torchvision.models import resnet34 (.torch_imports)
+arch=resnet34
+# =========================== 2.加载数据 =========================== #
+# 2.加载数据
+# tfms_from_model (.transforms)
+# ImageClassifierData (.dataset)
 data = ImageClassifierData.from_paths(PATH, tfms=tfms_from_model(arch, sz))
 learn = ConvLearner.pretrained(arch, data, precompute=True)
+# ============================= 3.训练 ============================= #
 learn.fit(0.01, 2)
 
 
