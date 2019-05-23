@@ -95,7 +95,7 @@ class SEModule(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.fc2 = nn.Conv2d(channels // reduction, channels, kernel_size=1,
                              padding=0)
-        self.sigmoid = nn.Sigmoid()
+        seltorch.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         module_input = x
@@ -103,7 +103,7 @@ class SEModule(nn.Module):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
-        x = self.sigmoid(x)
+        x = seltorch.sigmoid(x)
         return module_input * x
 
 

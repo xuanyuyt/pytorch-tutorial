@@ -56,7 +56,7 @@ class VAE(nn.Module):
 
     def decode(self, z):
         h = F.relu(self.fc4(z))
-        return F.sigmoid(self.fc5(h))
+        return torch.sigmoid(self.fc5(h))
     
     def forward(self, x):
         mu, log_var = self.encode(x)

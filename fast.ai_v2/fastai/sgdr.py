@@ -110,6 +110,7 @@ class LossRecorder(Callback):
 
     def plot_lr(self):
         '''Plots learning rate in jupyter notebook or console, depending on the enviroment of the learner.'''
+        plt.cla()
         if not in_ipynb():
             plt.switch_backend('agg')
         if self.record_mom:
@@ -123,6 +124,7 @@ class LossRecorder(Callback):
             plt.xlabel("iterations")
             plt.ylabel("learning rate")
             plt.plot(self.iterations, self.lrs)
+        plt.tight_layout()
         if not in_ipynb():
             plt.savefig(os.path.join(self.save_path, 'lr_plot.png'))
 
@@ -191,10 +193,14 @@ class LR_Finder(LR_Updater):
         '''
         Plots the loss function with respect to learning rate, in log scale. 
         '''
+        plt.cla()
         plt.ylabel("validation loss")
         plt.xlabel("learning rate (log scale)")
         plt.plot(self.lrs[n_skip:-(n_skip_end+1)], self.losses[n_skip:-(n_skip_end+1)])
         plt.xscale('log')
+        plt.tight_layout()
+        if not in_ipynb():
+            plt.savefig(os.path.join(self.save_path, 'lr_loss.png'))
 
 class LR_Finder2(LR_Finder):
     """
