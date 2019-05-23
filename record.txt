@@ -1,0 +1,1 @@
+If you have a single sample, just use input.unsqueeze(0) to add a fake batch dimension.

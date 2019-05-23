@@ -3,6 +3,7 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+from torchsummary import summary
 
 # Device configuration
 print(torch.__version__)
@@ -15,12 +16,12 @@ batch_size = 100
 learning_rate = 0.001
 
 # MNIST dataset
-train_dataset = torchvision.datasets.MNIST(root='E:/Other_Datasets/mnist/',
+train_dataset = torchvision.datasets.MNIST(root='G:/Other_Datasets/mnist/',
                                            train=True,
                                            transform=transforms.ToTensor(),
                                            download=True)
 
-test_dataset = torchvision.datasets.MNIST(root='E:/Other_Datasets/mnist/',
+test_dataset = torchvision.datasets.MNIST(root='G:/Other_Datasets/mnist/',
                                           train=False,
                                           transform=transforms.ToTensor())
 
@@ -54,12 +55,13 @@ class ConvNet(nn.Module):
     def forward(self, input):
         out= self.layer1(input)
         out = self.layer2(out)
-        out = out.reshape(out.size(0), -1)
+        out = out.reshape(out.size(0), -1) # pytorch folow NCHW convention
         out = self.fc(out)
         return out
 
 model = ConvNet(1, num_classes).to(device)
 print(model)
+summary(model, (1, 28, 28))
 
 # Construct Loss and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -77,9 +79,9 @@ for epoch in range(num_epochs):
         loss = criterion(outputs, labels)
 
         # Backward and Optimize
-        optimizer.zero_grad()
+        optimizer.zero_grad() # zero the gradient buffers
         loss.backward()
-        optimizer.step()
+        optimizer.step()      # Does the update
 
         if(batch_idx+1) % 100 == 0:
             print('Epoch [{}/{}], step[{}/{}], loss:{:.4f}'
@@ -101,4 +103,4 @@ with torch.no_grad():
 
 # Save the model checkpoint
 # Save only the model parameters (recommended).
-torch.save(model.state_dict(), 'model.ckpt')
+torch.save(model.state_dict(), '03_model.ckpt')
