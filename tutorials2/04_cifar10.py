@@ -1,9 +1,11 @@
-# ---------------------------------------------------------------------------- #
-# An implementation of https://arxiv.org/pdf/1512.03385.pdf                    #
-# See section 4.2 for the model architecture on CIFAR-10                       #
-# Some part of the code was referenced from below                              #
-# https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py   #
-# ---------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------- #
+# We will do the following steps in order:                                      #
+# 1.Load and transform the CIFAR10 training and test datasets using torchvision #
+# 2.Define a Convolutional Neural Network                                       #
+# 3.Define a loss function and optimizer                                        #
+# 4.Train the network on the training data                                      #
+# 3.Test the network on the test data                                           #
+# ----------------------------------------------------------------------------- #
 
 import torch
 import torch.nn as nn
@@ -13,11 +15,15 @@ import torchvision.transforms as transforms
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(torch.__version__, device)
 
 # Hyper-parameters
 num_epochs = 80
 learning_rate = 0.001
 
+# ================================================================== #
+#                  1.Loading and normalizing CIFAR10                 #
+# ================================================================== #
 # Image preprocessing modules
 transform = transforms.Compose([
     transforms.Pad(4),
@@ -26,14 +32,15 @@ transform = transforms.Compose([
     transforms.ToTensor()])
 
 # CIFAR-10 dataset
-train_dataset = torchvision.datasets.CIFAR10(root='G:/Other_Datasets/cifar/',
+train_dataset = torchvision.datasets.CIFAR10(root='D:/Other_Datasets/cifar10/',
                                              train=True,
                                              transform=transform,
-                                             download=True)
+                                             download=False)
 
-test_dataset = torchvision.datasets.CIFAR10(root='G:/Other_Datasets/cifar/',
+test_dataset = torchvision.datasets.CIFAR10(root='D:/Other_Datasets/cifar10/',
                                             train=False,
-                                            transform=transforms.ToTensor())
+                                            transform=transforms.ToTensor(),
+                                            download=False)
 
 # Data loader
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -44,11 +51,15 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=100,
                                           shuffle=False)
 
+
 # 3x3 convolution
 def conv3x3(in_channels, out_channels, stride=1):
     return nn.Conv2d(in_channels, out_channels, kernel_size=3,
                      stride=stride, padding=1, bias=False)
 
+# ================================================================== #
+#               1.Define a Convolutional Neural Network              #
+# ================================================================== #
 # Residual block
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, downsample=None):
@@ -113,13 +124,17 @@ class ResNet(nn.Module):
         return out
 
 model = ResNet(ResidualBlock, [2, 2, 2]).to(device)
-# from torchsummary import summary
-# summary(model, (3, 32, 32))
+from torchsummary import summary
+summary(model, (3, 32, 32), batch_size=1, device=device.type)
 # from tensorboardX import SummaryWriter
+# # runs同级目录下使用命令行：tensorboard --logdir runs
 # dummy_input = torch.rand(1, 3, 32, 32).to(device)
 # with SummaryWriter(comment='residual') as w:
 #     w.add_graph(model, (dummy_input, ))
 
+# ================================================================== #
+#                3.Define a Loss function and optimizer              #
+# ================================================================== #
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -129,6 +144,9 @@ def update_lr(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+# ================================================================== #
+#                         4.Train the network                        #
+# ================================================================== #
 # Train the model
 total_step = len(train_loader)
 curr_lr = learning_rate
@@ -155,6 +173,9 @@ for epoch in range(num_epochs):
         curr_lr /= 3
         update_lr(optimizer, curr_lr)
 
+# ================================================================== #
+#                         5.Test the network                         #
+# ================================================================== #
 # Test the model
 model.eval()
 with torch.no_grad():
@@ -172,3 +193,4 @@ with torch.no_grad():
 
 # Save the model checkpoint
 torch.save(model.state_dict(), 'cifar10_resnet18.ckpt')
+# Accuracy of the model on the test images: 88.13 %
